@@ -1,0 +1,115 @@
+pipeline {
+    agent any
+environment {
+        Cluster_Name = 'tbdcluster'
+        K8s_Version = '1.21'
+        Region = 'us-east-1'
+        Availability_Zones = 'us-east-1a,us-east-1f'
+        NodeGroup_Name = 'tbdng'
+        Instance_Type = 't2.small'
+        Desired_Nodes = '1'
+        Min_Nodes = '1'
+        Max_Nodes = '2'
+        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:v2.1'
+
+    }
+    stages {
+        stage('List EKS Cluster') {
+            steps {
+                   withAWS(credentials:'aws_credentials') {
+                   sh '''
+                        clusters="$(aws eks list-clusters --region us-east-1 --output text | awk '{print $2}')"
+                        echo ${clusters} > myclusters.txt
+                      '''
+                    script {
+                        myCls = readFile('myclusters.txt').trim()
+                    }              
+                    echo "${myCls} are EKS Clusters found on AWS"
+                }
+            }
+        }
+	    stage('EKS Cluster & Node Group Creation & Update Kubeconfig') {
+            steps {
+                   withAWS(credentials:'aws_credentials') {
+                script {
+                    if ("${Cluster_Name}" == "${myCls}") {
+                        echo "${Cluster_Name} is already present on AWS, jumping to the next stage"
+                    } else {
+                        echo "${Cluster_Name} not found on AWS, creating ${Cluster_Name}..."
+                        sh '''
+                                    eksctl create cluster \
+                                        --name ${Cluster_Name} \
+                                        --version ${K8s_Version} \
+                                        --region ${Region} \
+                                        --zones "${Availability_Zones}" \
+                                        --nodegroup-name ${NodeGroup_Name} \
+                                        --node-type ${Instance_Type} \
+                                        --nodes ${Desired_Nodes} \
+                                        --nodes-min ${Min_Nodes} \
+                                        --nodes-max ${Max_Nodes} \
+                                        --managed \
+
+                                    aws eks --region ${Region} update-kubeconfig --name ${Cluster_Name}
+                                    kubectl get nodes
+                                '''        
+                        }
+                    }
+                }
+            }
+        }
+        stage('Create Docker image & push to AWS ECR') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh './makedocker.sh'
+                  }
+            }
+        }
+        // stage('List Docker Images from AWS ECR') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //                images="$(aws ecr list-images --repository-name petclinic --region us-east-1 --output=text | awk '{print $3}')"
+        //                echo ${images} > myimages.txt
+        //               '''
+        //             script {
+        //                 myImg = readFile('myimages.txt').trim()
+        //             }              
+        //             echo "${myImg} are ECR Images found on AWS"
+        //           }
+        //     }
+        // }
+        stage('Deploy Application on EKS Cluster') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh """#!/bin/bash
+                           cat cicd/kubernetes/deployment.yaml | grep image
+                           sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
+                           cat cicd/kubernetes/deployment.yaml | grep image
+                           git status
+                           git branch
+                           git checkout origin/MigrationToCloud
+                           git add cicd/kubernetes/deployment.yaml
+                           git commit -m "latest deployment file"
+                           git remote rm origin
+                           git remote add origin 'git@github.com:asad2733/spring-petclinic-docker.git'
+                           git push origin HEAD:origin/MigrationToCloud
+                           git status
+                     """
+                  }
+            }
+        }
+
+        // stage('Create K8s Service ') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //                     kubectl apply -f cicd/kubernetes/service_external.yaml
+        //                     sleep 100
+        //                     kubectl get svc -o wide
+        //              '''
+        //           }
+        //     }
+        // }
+    }
+}
+    
