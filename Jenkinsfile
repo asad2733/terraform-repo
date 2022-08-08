@@ -98,7 +98,6 @@ environment {
         }
         stage('Deploy Application on EKS Cluster') {
             steps {
-                  withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
                   withAWS(credentials:'aws_credentials') {
                   sh '''
                             kubectl apply -f cicd/kubernetes/deployment.yaml
