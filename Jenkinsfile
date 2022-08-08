@@ -85,15 +85,6 @@ environment {
                            cat cicd/kubernetes/deployment.yaml | grep image
                            sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
                            cat cicd/kubernetes/deployment.yaml | grep image
-                           git status
-                           git branch
-                           git checkout origin/MigrationToCloud
-                           git add cicd/kubernetes/deployment.yaml
-                           git commit -m "latest deployment file"
-                           git remote rm origin
-                           git remote add origin 'git@github.com:asad2733/spring-petclinic-docker.git'
-                           git push origin HEAD:origin/MigrationToCloud
-                           git status
                      """
                   }
             }
