@@ -10,7 +10,7 @@ environment {
         Desired_Nodes = '1'
         Min_Nodes = '1'
         Max_Nodes = '2'
-        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:latest'
+        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:3.1'
 
     }
     stages {
@@ -78,9 +78,9 @@ environment {
         //           }
         //     }
         // }
-        stage('Deploy Application on EKS Cluster') {
+        stage('Modify Deployment.yaml file ') {
             steps {
-                  withCredentials([gitUsernamePassword(credentialsId: 'trial2')]) {
+                  withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
                   sh """#!/bin/bash
                            cat cicd/kubernetes/deployment.yaml | grep image
                            sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
@@ -96,18 +96,28 @@ environment {
                   }
             }
         }
+        stage('Deploy Application on EKS Cluster') {
+            steps {
+                  withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                            kubectl apply -f cicd/kubernetes/deployment.yaml
+                     '''
+                  }
+            }
+        }
 
-        // stage('Create K8s Service ') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //                     kubectl apply -f cicd/kubernetes/service_external.yaml
-        //                     sleep 100
-        //                     kubectl get svc -o wide
-        //              '''
-        //           }
-        //     }
-        // }
+        stage('Create K8s Service ') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                            kubectl apply -f cicd/kubernetes/service_external.yaml
+                            sleep 100
+                            kubectl get svc -o wide
+                     '''
+                  }
+            }
+        }
     }
 }
     
