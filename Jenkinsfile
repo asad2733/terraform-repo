@@ -85,6 +85,13 @@ environment {
                            cat cicd/kubernetes/deployment.yaml | grep image
                            sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
                            cat cicd/kubernetes/deployment.yaml | grep image
+                           git status
+                           git branch
+                           git checkout MigrationToCloud
+                           git add .
+                           git commit -m "latest deployment file"
+                           git push origin HEAD:MigrationToCloud
+                           git status
                      """
                   }
             }
