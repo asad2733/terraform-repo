@@ -16,6 +16,6 @@ spec:
     spec:
        containers:
          - name: spring-petclinic-docker
-           image: petclinic
+           image: "615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:3.1"
            ports:
              - containerPort: 8080
