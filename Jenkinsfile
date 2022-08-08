@@ -80,7 +80,7 @@ environment {
         // }
         stage('Deploy Application on EKS Cluster') {
             steps {
-                  withAWS(credentials:'aws_credentials') {
+                  withCredentials([gitUsernamePassword(credentialsId: 'trial2')]) {
                   sh """#!/bin/bash
                            cat cicd/kubernetes/deployment.yaml | grep image
                            sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
