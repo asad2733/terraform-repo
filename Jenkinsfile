@@ -10,7 +10,7 @@ environment {
         Desired_Nodes = '1'
         Min_Nodes = '1'
         Max_Nodes = '2'
-        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:3.1'
+        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:v1.2.3'
 
     }
     stages {
