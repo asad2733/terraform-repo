@@ -2,121 +2,182 @@ pipeline {
     agent any
 environment {
         Cluster_Name = 'tbdcluster'
-        K8s_Version = '1.21'
         Region = 'us-east-1'
-        Availability_Zones = 'us-east-1a,us-east-1f'
-        NodeGroup_Name = 'tbdng'
-        Instance_Type = 't2.small'
-        Desired_Nodes = '1'
-        Min_Nodes = '1'
-        Max_Nodes = '2'
-        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:v1.2.3'
+        Vpc = 'vpc-fa45c687'
+        Subnets = 'subnet-aed9a9f1,subnet-288da426'
+        Launch_Type = 'EC2'
+        Desired_Size = '1'
+        Instance_Type = 'a'
+        Key_Name = 'asad'
+        K8s_Version = '1.21'
+        Availability_Zones = 'a'
+        NodeGroup_Name = 'a'
+        Instance_Type = 'a'
+        Desired_Nodes = 'a'
+        Min_Nodes = 'a'
+        Max_Nodes = 'a'
+        Image_Name = 'a'
 
     }
     stages {
-        stage('List EKS Cluster') {
+        stage('List ECS Cluster') {
             steps {
                    withAWS(credentials:'aws_credentials') {
                    sh '''
-                        clusters="$(aws eks list-clusters --region us-east-1 --output text | awk '{print $2}')"
-                        echo ${clusters} > myclusters.txt
+                        ecsclsarn="$(aws ecs list-clusters --region ${Region} --output text | awk '{print $2}')"
+                        ecscls="$(aws ecs describe-clusters --region ${Region} --cluster=${ecsclsarn} --output text | awk '{print $4}')"
+                        echo ${ecscls} > myecsclusters.txt
                       '''
                     script {
-                        myCls = readFile('myclusters.txt').trim()
+                        myecsCls = readFile('myecsclusters.txt').trim()
                     }              
-                    echo "${myCls} are EKS Clusters found on AWS"
+                    echo "${myecsCls} are ECS Clusters found on AWS"
                 }
             }
         }
-	    stage('EKS Cluster & Node Group Creation & Update Kubeconfig') {
+
+	    stage('ECS Cluster Creation') {
             steps {
-                   withAWS(credentials:'aws_credentials') {
+                  withAWS(credentials:'aws_credentials') {
                 script {
-                    if ("${Cluster_Name}" == "${myCls}") {
+                    if ("${Cluster_Name}" == "${myecsCls}") {
                         echo "${Cluster_Name} is already present on AWS, jumping to the next stage"
                     } else {
                         echo "${Cluster_Name} not found on AWS, creating ${Cluster_Name}..."
                         sh '''
-                                    eksctl create cluster \
-                                        --name ${Cluster_Name} \
-                                        --version ${K8s_Version} \
-                                        --region ${Region} \
-                                        --zones "${Availability_Zones}" \
-                                        --nodegroup-name ${NodeGroup_Name} \
-                                        --node-type ${Instance_Type} \
-                                        --nodes ${Desired_Nodes} \
-                                        --nodes-min ${Min_Nodes} \
-                                        --nodes-max ${Max_Nodes} \
-                                        --managed \
-
-                                    aws eks --region ${Region} update-kubeconfig --name ${Cluster_Name}
-                                    kubectl get nodes
-                                '''        
+                            ecs-cli up --capability-iam \
+                                --cluster ${Cluster_Name} \
+                                --vpc ${Vpc} \
+                                --subnets "${Subnets}" \
+                                --launch-type ${Launch_Type} \
+                                --size ${Desired_Size}  \
+                                --region ${Region} \
+                                --instance-type ${Instance_Type} \
+                                --keypair ${Key_Name} \
+                            '''
                         }
                     }
                 }
-            }
-        }
-        stage('Create Docker image & push to AWS ECR') {
-            steps {
-                  withAWS(credentials:'aws_credentials') {
-                  sh './makedocker.sh'
-                  }
-            }
-        }
-        // stage('List Docker Images from AWS ECR') {
+            
+        // stage('Create Log Group') {
         //     steps {
         //           withAWS(credentials:'aws_credentials') {
         //           sh '''
-        //                images="$(aws ecr list-images --repository-name petclinic --region us-east-1 --output=text | awk '{print $3}')"
-        //                echo ${images} > myimages.txt
+        //               aws logs create-log-group \
+        //                   --region us-east-1 \
+        //                   --log-group-name /ecs/nginx-td-7
         //               '''
-        //             script {
-        //                 myImg = readFile('myimages.txt').trim()
-        //             }              
-        //             echo "${myImg} are ECR Images found on AWS"
         //           }
+        //         }
         //     }
-        // }
-        stage('Modify Deployment.yaml file ') {
-            steps {
-                  withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
-                  sh """#!/bin/bash
-                           cat cicd/kubernetes/deployment.yaml | grep image
-                           sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
-                           cat cicd/kubernetes/deployment.yaml | grep image
-                           git status
-                           git branch
-                           git checkout MigrationToCloud
-                           git add .
-                           git commit -m "latest deployment file"
-                           git push origin HEAD:MigrationToCloud
-                           git status
-                     """
-                  }
-            }
-        }
-        stage('Deploy Application on EKS Cluster') {
-            steps {
-                  withAWS(credentials:'aws_credentials') {
-                  sh '''
-                            kubectl apply -f cicd/kubernetes/deployment.yaml
-                     '''
-                  }
-            }
-        }
-
-        stage('Create K8s Service ') {
-            steps {
-                  withAWS(credentials:'aws_credentials') {
-                  sh '''
-                            kubectl apply -f cicd/kubernetes/service_external.yaml
-                            sleep 100
-                            kubectl get svc -o wide
-                     '''
-                  }
-            }
+            
+        // stage('Registering a Task Definition') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //               aws ecs register-task-definition \
+        //                   --region us-east-1 \
+        //                   --family nginx-td \
+        //                   --requires-compatibilities EC2 \
+        //                   --container-definitions '[{\"name\":\"nginx-c2\",\"image\":\"nginx\",\"memory\":256,\"essential\":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "us-east-1", "awslogs-stream-prefix": "ecs", "awslogs-group": "/ecs/nginx-td-7"}}, "portMappings": [{"containerPort": 80, "hostPort": 80, "protocol": "tcp" } ]}]'
+        //               sleep 100
+        //               '''
+        //           }
+        //         }
+        //     }
+            
+        // stage('Run a Task on ECS Cluster') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //             aws ecs run-task \
+        //                 --cluster tbdcluster\
+        //                 --launch-type EC2 \
+        //                 --task-definition nginx-td \
+        //                 --region us-east-1 \
+        //                 --count 2
+        //               '''
+        //           }
+        //         }
+        //     }
+            
+        // stage('Verify Status of Task') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //                 aws ecs list-tasks --cluster tbdcluster --region us-east-1
+        //               '''
+        //           }
+        //         }
+        //     }   
+            
+        // stage('Create Load Balancer, Target Groups & Service on ECS') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //             lb="$(aws elbv2 create-load-balancer --name app-load-balancer \
+	    //                --subnets subnet-aed9a9f1 subnet-42e59224 \
+	    //                --security-groups sg-0ae1c1db565622ba8 \
+	    //                --region us-east-1 \
+	    //                --output text | awk '{print $6}')"
+	                   
+        //             targrp="$(aws elbv2 create-target-group --name ecs-targets \
+	    //                --protocol HTTP \
+	    //                --port 80 \
+	    //                --region us-east-1 \
+	    //                --vpc-id vpc-fa45c687 \
+	    //                --output text | awk '{print $11}')"
+	                   
+	    //             ecsinstlist="$(aws ecs list-container-instances \
+	    //                --region us-east-1 \
+        //                --cluster tbdcluster --output text | awk '{print $2}')"
+                       
+        //             ecsinstid="$(aws ecs describe-container-instances --cluster tbdcluster \
+        //                --region us-east-1 \
+        //                --container-instances ${ecsinstlist} | grep ec2InstanceId | awk '{print $2}' | tr -d '"' | tr -d ',')"
+	                   
+        //             aws elbv2 register-targets --target-group-arn ${targrp} \
+	    //                --targets Id=${ecsinstid} \
+	    //                --region us-east-1 \
+	    //                --debug
+	                   
+        //             aws elbv2 create-listener --load-balancer-arn ${lb} \
+	    //                --protocol HTTP \
+	    //                --port 80  \
+	    //                --region us-east-1 \
+	    //                --default-actions Type=forward,TargetGroupArn=${targrp}
+	                   
+        //             aws ecs create-service \
+        //                     --cluster tbdcluster \
+        //                     --region us-east-1 \
+        //                     --service-name tbdservice \
+        //                     --launch-type EC2 \
+        //                     --load-balancers \"targetGroupArn=$targrp,containerName=nginx-c2,containerPort=80\" \
+        //                     --task-definition nginx-td \
+        //                     --desired-count 2 
+        //             sleep 100
+        //             aws elbv2 describe-load-balancers --region us-east-1 --names app-load-balancer | grep DNSName
+        //               '''
+        //           }
+        //         }
+        //     }
+            
+        // stage('Create a Service on ECS') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //                 aws ecs create-service \
+        //                     --cluster tbdcluster \
+        //                     --region us-east-1 \
+        //                     --service-name tbdservice \
+        //                     --load-balancers '[{"targetGroupArn": "${targrp}","containerName": "nginx-c2","containerPort": 80}]' \
+        //                     --task-definition nginx-td \
+        //                     --desired-count 2
+        //                 aws elbv2 describe-load-balancers --region us-east-1 --names app-load-balancer | grep DNSName
+        //               '''
+        //           }
+        //         }
+        //     }
         }
     }
-}
     
