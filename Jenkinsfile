@@ -9,7 +9,11 @@ environment {
         Desired_Size = '1'
         Instance_Type = 't2.small'
         Key_Name = 'asad'
-        LogGrp_Name = 'nginx-td-8'
+        LogGrp_Name = 'nginx-td-9'
+        TaskDef_Family = 'nginx-td'
+        Container_Name = 'nginx-c2'
+        Image_Name = 'nginx'
+        Port_No = '80'
 
     }
     stages {
@@ -66,20 +70,20 @@ environment {
             }
         }
             
-        // stage('Registering a Task Definition') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //               aws ecs register-task-definition \
-        //                   --region us-east-1 \
-        //                   --family nginx-td \
-        //                   --requires-compatibilities EC2 \
-        //                   --container-definitions '[{\"name\":\"nginx-c2\",\"image\":\"nginx\",\"memory\":256,\"essential\":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "us-east-1", "awslogs-stream-prefix": "ecs", "awslogs-group": "/ecs/nginx-td-7"}}, "portMappings": [{"containerPort": 80, "hostPort": 80, "protocol": "tcp" } ]}]'
-        //               sleep 100
-        //               '''
-        //           }
-        //         }
-        //     }
+        stage('Registering a Task Definition') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                      aws ecs register-task-definition \
+                          --region ${Region} \
+                          --family nginx-td \
+                          --requires-compatibilities ${Launch_Type} \
+                          --container-definitions '[{\"name\":\"${Container_Name}\",\"image\":\"${Image_Name}\",\"essential\":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "${Region}", "awslogs-stream-prefix": "ecs", "awslogs-group": "/ecs/${LogGrp_Name}"}}, "portMappings": [{"containerPort": ${Port_No}, "hostPort": ${Port_No}, "protocol": "tcp" } ]}]'
+                      sleep 100
+                      '''
+                  }
+                }
+            }
             
         // stage('Run a Task on ECS Cluster') {
         //     steps {
