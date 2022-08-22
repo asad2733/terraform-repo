@@ -1,7 +1,7 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'tbccluster'
+        Cluster_Name = 'tbdcluster'
         Region = 'us-east-1'
         Vpc = 'vpc-fa45c687'
         Subnets = 'subnet-aed9a9f1,subnet-288da426'
@@ -9,6 +9,7 @@ environment {
         Desired_Size = '1'
         Instance_Type = 't2.small'
         Key_Name = 'asad'
+        LogGrp_Name = 'nginx-td-8'
 
     }
     stages {
@@ -53,17 +54,17 @@ environment {
             }
         }        
             
-        // stage('Create Log Group') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //               aws logs create-log-group \
-        //                   --region us-east-1 \
-        //                   --log-group-name /ecs/nginx-td-7
-        //               '''
-        //           }
-        //         }
-        //     }
+        stage('Create Log Group') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                      aws logs create-log-group \
+                          --region ${Region} \
+                          --log-group-name /ecs/${LogGrp_Name}
+                      '''
+                }
+            }
+        }
             
         // stage('Registering a Task Definition') {
         //     steps {
