@@ -9,14 +9,14 @@ environment {
         Desired_Size = '1'
         Instance_Type = 'a'
         Key_Name = 'asad'
-        K8s_Version = '1.21'
-        Availability_Zones = 'a'
-        NodeGroup_Name = 'a'
-        Instance_Type = 'a'
-        Desired_Nodes = 'a'
-        Min_Nodes = 'a'
-        Max_Nodes = 'a'
-        Image_Name = 'a'
+        // K8s_Version = 'a'
+        // Availability_Zones = 'a'
+        // NodeGroup_Name = 'a'
+        // Instance_Type = 'a'
+        // Desired_Nodes = 'a'
+        // Min_Nodes = 'a'
+        // Max_Nodes = 'a'
+        // Image_Name = 'a'
 
     }
     stages {
@@ -178,6 +178,7 @@ environment {
         //           }
         //         }
         //     }
+            }
         }
     }
     
