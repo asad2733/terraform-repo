@@ -7,16 +7,8 @@ environment {
         Subnets = 'subnet-aed9a9f1,subnet-288da426'
         Launch_Type = 'EC2'
         Desired_Size = '1'
-        Instance_Type = 'a'
+        Instance_Type = 't2.small'
         Key_Name = 'asad'
-        // K8s_Version = 'a'
-        // Availability_Zones = 'a'
-        // NodeGroup_Name = 'a'
-        // Instance_Type = 'a'
-        // Desired_Nodes = 'a'
-        // Min_Nodes = 'a'
-        // Max_Nodes = 'a'
-        // Image_Name = 'a'
 
     }
     stages {
@@ -58,6 +50,8 @@ environment {
                         }
                     }
                 }
+            }
+        }        
             
         // stage('Create Log Group') {
         //     steps {
@@ -180,5 +174,4 @@ environment {
         //     }
             }
         }
-    }
     
