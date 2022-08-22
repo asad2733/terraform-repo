@@ -1,7 +1,7 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'tbdcluster'
+        Cluster_Name = 'tbccluster'
         Region = 'us-east-1'
         Vpc = 'vpc-fa45c687'
         Subnets = 'subnet-aed9a9f1,subnet-288da426'
