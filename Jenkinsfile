@@ -9,7 +9,7 @@ environment {
         Desired_Size = '1'
         Instance_Type = 't2.small'
         Key_Name = 'asad'
-        LogGrp_Name = 'nginx-td-9'
+        LogGrp_Name = 'nginx-td-10'
         TaskDef_Family = 'nginx-td'
         Container_Name = 'nginx-c2'
         Image_Name = 'nginx'
@@ -78,7 +78,7 @@ environment {
                           --region ${Region} \
                           --family nginx-td \
                           --requires-compatibilities ${Launch_Type} \
-                          --container-definitions '[{\"name\":\"${Container_Name}\",\"image\":\"${Image_Name}\",\"essential\":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "${Region}", "awslogs-stream-prefix": "ecs", "awslogs-group": "/ecs/${LogGrp_Name}"}}, "portMappings": [{"containerPort": ${Port_No}, "hostPort": ${Port_No}, "protocol": "tcp" } ]}]'
+                          --container-definitions '[{\"'"name\"'":\"'"${Container_Name}\"'",\"'"image\"'":\"'"${Image_Name}\"'",\"memory\":256,\"'"essential\"'":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "'"${Region}"'", "awslogs-stream-prefix": "ecs", "awslogs-group": "'"/ecs/${LogGrp_Name}"'"}}, "portMappings": [{"containerPort": '${Port_No}', "hostPort": '${Port_No}', "protocol": "tcp" } ]}]'
                       sleep 100
                       '''
                   }
