@@ -14,7 +14,11 @@ environment {
         Container_Name = 'nginx-c2'
         Image_Name = 'nginx'
         Port_No = '80'
-        No_of_Task = '2'
+        No_of_Task = '3'
+        LB_Name = 'app-load-balancer'
+        Security_Group = 'sg-0ae1c1db565622ba8'
+        Service_Name = 'tbdservice'
+        Desired_Count = '2'
 
     }
     stages {
@@ -101,66 +105,66 @@ environment {
                 }
             }
             
-        // stage('Verify Status of Task') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //                 aws ecs list-tasks --cluster tbdcluster --region us-east-1
-        //               '''
-        //           }
-        //         }
-        //     }   
+        stage('Verify Status of Task') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                        aws ecs list-tasks --cluster ${Cluster_Name} --region ${Region}
+                      '''
+                  }
+                }
+            }   
             
-        // stage('Create Load Balancer, Target Groups & Service on ECS') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //             lb="$(aws elbv2 create-load-balancer --name app-load-balancer \
-	    //                --subnets subnet-aed9a9f1 subnet-42e59224 \
-	    //                --security-groups sg-0ae1c1db565622ba8 \
-	    //                --region us-east-1 \
-	    //                --output text | awk '{print $6}')"
+        stage('Create Load Balancer, Target Groups & Service on ECS') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                    lb="$(aws elbv2 create-load-balancer --name ${LB_Name} \
+	                   --subnets "${Subnets}" \
+	                   --security-groups ${Security_Group} \
+	                   --region ${Region} \
+	                   --output text | awk '{print $6}')"
 	                   
-        //             targrp="$(aws elbv2 create-target-group --name ecs-targets \
-	    //                --protocol HTTP \
-	    //                --port 80 \
-	    //                --region us-east-1 \
-	    //                --vpc-id vpc-fa45c687 \
-	    //                --output text | awk '{print $11}')"
+                    targrp="$(aws elbv2 create-target-group --name ecs-targets \
+	                   --protocol HTTP \
+	                   --port ${Port_No} \
+	                   --region ${Region} \
+	                   --vpc-id ${Vpc} \
+	                   --output text | awk '{print $11}')"
 	                   
-	    //             ecsinstlist="$(aws ecs list-container-instances \
-	    //                --region us-east-1 \
-        //                --cluster tbdcluster --output text | awk '{print $2}')"
+	                ecsinstlist="$(aws ecs list-container-instances \
+	                   --region ${Region} \
+                       --cluster ${Cluster_Name} --output text | awk '{print $2}')"
                        
-        //             ecsinstid="$(aws ecs describe-container-instances --cluster tbdcluster \
-        //                --region us-east-1 \
-        //                --container-instances ${ecsinstlist} | grep ec2InstanceId | awk '{print $2}' | tr -d '"' | tr -d ',')"
+                    ecsinstid="$(aws ecs describe-container-instances --cluster tbdcluster \
+                       --region ${Region} \
+                       --container-instances ${ecsinstlist} | grep ec2InstanceId | awk '{print $2}' | tr -d '"' | tr -d ',')"
 	                   
-        //             aws elbv2 register-targets --target-group-arn ${targrp} \
-	    //                --targets Id=${ecsinstid} \
-	    //                --region us-east-1 \
-	    //                --debug
+                    aws elbv2 register-targets --target-group-arn ${targrp} \
+	                   --targets Id=${ecsinstid} \
+	                   --region ${Region} \
+	                   --debug
 	                   
-        //             aws elbv2 create-listener --load-balancer-arn ${lb} \
-	    //                --protocol HTTP \
-	    //                --port 80  \
-	    //                --region us-east-1 \
-	    //                --default-actions Type=forward,TargetGroupArn=${targrp}
+                    aws elbv2 create-listener --load-balancer-arn ${lb} \
+	                   --protocol HTTP \
+	                   --port ${Port_No} \
+	                   --region ${Region} \
+	                   --default-actions Type=forward,TargetGroupArn=${targrp}
 	                   
-        //             aws ecs create-service \
-        //                     --cluster tbdcluster \
-        //                     --region us-east-1 \
-        //                     --service-name tbdservice \
-        //                     --launch-type EC2 \
-        //                     --load-balancers \"targetGroupArn=$targrp,containerName=nginx-c2,containerPort=80\" \
-        //                     --task-definition nginx-td \
-        //                     --desired-count 2 
-        //             sleep 100
-        //             aws elbv2 describe-load-balancers --region us-east-1 --names app-load-balancer | grep DNSName
-        //               '''
-        //           }
-        //         }
-        //     }
+                    aws ecs create-service \
+                            --cluster ${Cluster_Name} \
+                            --region ${Region} \
+                            --service-name ${Service_Name} \
+                            --launch-type ${Launch_Type} \
+                            --load-balancers \"targetGroupArn=$targrp,containerName=${Container_Name},containerPort=${Port_No}\" \
+                            --task-definition ${TaskDef_Family} \
+                            --desired-count ${Desired_Count} 
+                    sleep 100
+                    aws elbv2 describe-load-balancers --region ${Region} --names ${LB_Name} | grep DNSName
+                      '''
+                  }
+                }
+            }
             
         // stage('Create a Service on ECS') {
         //     steps {
