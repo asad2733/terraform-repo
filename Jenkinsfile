@@ -9,11 +9,12 @@ environment {
         Desired_Size = '1'
         Instance_Type = 't2.small'
         Key_Name = 'asad'
-        LogGrp_Name = 'nginx-td-10'
+        LogGrp_Name = 'nginx-td-12'
         TaskDef_Family = 'nginx-td'
         Container_Name = 'nginx-c2'
         Image_Name = 'nginx'
         Port_No = '80'
+        No_of_Task = '2'
 
     }
     stages {
@@ -76,7 +77,7 @@ environment {
                   sh '''
                       aws ecs register-task-definition \
                           --region ${Region} \
-                          --family nginx-td \
+                          --family ${TaskDef_Family} \
                           --requires-compatibilities ${Launch_Type} \
                           --container-definitions '[{\"'"name\"'":\"'"${Container_Name}\"'",\"'"image\"'":\"'"${Image_Name}\"'",\"memory\":256,\"'"essential\"'":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "'"${Region}"'", "awslogs-stream-prefix": "ecs", "awslogs-group": "'"/ecs/${LogGrp_Name}"'"}}, "portMappings": [{"containerPort": '${Port_No}', "hostPort": '${Port_No}', "protocol": "tcp" } ]}]'
                       sleep 100
@@ -85,20 +86,20 @@ environment {
                 }
             }
             
-        // stage('Run a Task on ECS Cluster') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //             aws ecs run-task \
-        //                 --cluster tbdcluster\
-        //                 --launch-type EC2 \
-        //                 --task-definition nginx-td \
-        //                 --region us-east-1 \
-        //                 --count 2
-        //               '''
-        //           }
-        //         }
-        //     }
+        stage('Run a Task on ECS Cluster') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh '''
+                    aws ecs run-task \
+                        --cluster ${Cluster_Name} \
+                        --launch-type ${Launch_Type} \
+                        --task-definition ${TaskDef_Family} \
+                        --region ${Region} \
+                        --count ${No_of_Task}
+                      '''
+                  }
+                }
+            }
             
         // stage('Verify Status of Task') {
         //     steps {
