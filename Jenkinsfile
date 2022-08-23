@@ -9,7 +9,7 @@ environment {
         Desired_Size = '1'
         Instance_Type = 't2.small'
         Key_Name = 'asad'
-        LogGrp_Name = 'nginx-td-12'
+        LogGrp_Name = 'nginx-td-14'
         TaskDef_Family = 'nginx-td'
         Container_Name = 'nginx-c2'
         Image_Name = 'nginx'
