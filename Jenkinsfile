@@ -9,7 +9,7 @@ environment {
         Desired_Size = '1'
         Instance_Type = 't2.small'
         Key_Name = 'asad'
-        LogGrp_Name = 'nginx-td-16'
+        LogGrp_Name = 'nginx-td-18'
         TaskDef_Family = 'nginx-td'
         Container_Name = 'nginx-c2'
         Image_Name = 'nginx'
@@ -19,7 +19,7 @@ environment {
         Security_Group = 'sg-0ae1c1db565622ba8'
         Service_Name = 'tbdservice'
         Desired_Count = '2'
-        Subnets_for_LB = 'subnet-aed9a9f1'
+        Subnets_for_LB = 'subnet-aed9a9f1 subnet-42e59224'
 
     }
     stages {
