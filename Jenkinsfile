@@ -6,15 +6,15 @@ environment {
         Vpc = 'vpc-fa45c687'
         Subnets = 'subnet-aed9a9f1,subnet-42e59224'
         Launch_Type = 'EC2'
-        Desired_Size = '2'
-        Instance_Type = 't2.medium'
+        Desired_Size = '1'
+        Instance_Type = 't2.small'
         Key_Name = 'asad'
-        LogGrp_Name = 'petclinic-td-7'
+        LogGrp_Name = 'petclinic-td-8'
         TaskDef_Family = 'petclinic-td'
         Container_Name = 'petclinic-c1'
-        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:3.1'
+        Image_Name = 'kgvprasad/mypetclinicapp'
         Port_No = '8080'
-        No_of_Task = '3'
+        No_of_Task = '2'
         LB_Name = 'app-load-balancer'
         Security_Group = 'sg-0ae1c1db565622ba8'
         Service_Name = 'tbdservice'
@@ -85,7 +85,7 @@ environment {
                           --family ${TaskDef_Family} \
                           --requires-compatibilities ${Launch_Type} \
                           --container-definitions '[{\"'"name\"'":\"'"${Container_Name}\"'",\"'"image\"'":\"'"${Image_Name}\"'",\"memory\":256,\"'"essential\"'":true, "logConfiguration": {"logDriver": "awslogs", "options": {"awslogs-region": "'"${Region}"'", "awslogs-stream-prefix": "ecs", "awslogs-group": "'"/ecs/${LogGrp_Name}"'"}}, "portMappings": [{"containerPort": '${Port_No}', "hostPort": '${Port_No}', "protocol": "tcp" } ]}]'
-                      sleep 100
+                      #sleep 100
                       '''
                   }
                 }
