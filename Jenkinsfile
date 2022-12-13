@@ -1,16 +1,15 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'tbdcluster'
-        K8s_Version = '1.25'
+        Cluster_Name = 'awsbgcluster'
+        K8s_Version = '1.22'
         Region = 'us-east-1'
         Availability_Zones = 'us-east-1b,us-east-1c'
-        NodeGroup_Name = 'tbdng'
+        NodeGroup_Name = 'awsbgng'
         Instance_Type = 't2.medium'
         Desired_Nodes = '1'
         Min_Nodes = '1'
-        Max_Nodes = '3'
-        Image_Name = 'nginx'
+        Max_Nodes = '5'
 
     }
     stages {
@@ -19,12 +18,12 @@ environment {
                    withAWS(credentials:'aws_credentials') {
                    sh '''
                         clusters="$(aws eks list-clusters --region us-east-1 --output text | awk '{print $2}')"
-                        echo ${clusters} > myclusters.txt
+                        echo ${clusters} > myfile.txt
                       '''
                     script {
-                        myCls = readFile('myclusters.txt').trim()
+                        myVar = readFile('myfile.txt').trim()
                     }              
-                    echo "${myCls} are EKS Clusters found on AWS"
+                    echo "${myVar} are EKS Clusters found on AWS"
                 }
             }
         }
@@ -32,7 +31,7 @@ environment {
             steps {
                    withAWS(credentials:'aws_credentials') {
                 script {
-                    if ("${Cluster_Name}" == "${myCls}") {
+                    if ("${Cluster_Name}" == "${myVar}") {
                         echo "${Cluster_Name} is already present on AWS, jumping to the next stage"
                     } else {
                         echo "${Cluster_Name} not found on AWS, creating ${Cluster_Name}..."
@@ -57,50 +56,11 @@ environment {
                 }
             }
         }
-        stage('Create Docker image & push to AWS ECR') {
-            steps {
-                  withAWS(credentials:'aws_credentials') {
-                  sh './makedocker.sh'
-                  }
-            }
-        }
-        // stage('List Docker Images from AWS ECR') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh '''
-        //                images="$(aws ecr list-images --repository-name petclinic --region us-east-1 --output=text | awk '{print $3}')"
-        //                echo ${images} > myimages.txt
-        //               '''
-        //             script {
-        //                 myImg = readFile('myimages.txt').trim()
-        //             }              
-        //             echo "${myImg} are ECR Images found on AWS"
-        //           }
-        //     }
-        // }
-        stage('Modify Deployment.yaml file ') {
-            steps {
-                  withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
-                  sh """#!/bin/bash
-                           cat cicd/kubernetes/deployment.yaml | grep image
-                           sed -i 's|image: .*|image: "${Image_Name}"|' cicd/kubernetes/deployment.yaml
-                           cat cicd/kubernetes/deployment.yaml | grep image
-                           git status
-                           git branch
-                           git checkout MigrationToCloud
-                           git add .
-                           git commit -m "latest deployment file"
-                           git push origin HEAD:MigrationToCloud
-                           git status
-                     """
-                  }
-            }
-        }
         stage('Deploy Application on EKS Cluster') {
             steps {
                   withAWS(credentials:'aws_credentials') {
                   sh '''
-                            kubectl apply -f cicd/kubernetes/deployment.yaml
+                           kubectl apply -f cicd/kubernetes/deployment.yaml
                      '''
                   }
             }
@@ -111,7 +71,7 @@ environment {
                   withAWS(credentials:'aws_credentials') {
                   sh '''
                             kubectl apply -f cicd/kubernetes/service_external.yaml
-                            sleep 100
+                            sleep 50
                             kubectl get svc -o wide
                      '''
                   }
