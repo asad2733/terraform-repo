@@ -1,16 +1,16 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'tbdcluster'
+        Cluster_Name = 'trialcluster'
         K8s_Version = '1.21'
         Region = 'us-east-1'
-        Availability_Zones = 'us-east-1a,us-east-1f'
-        NodeGroup_Name = 'tbdng'
+        Availability_Zones = 'us-east-1a,us-east-1af'
+        NodeGroup_Name = 'trialng'
         Instance_Type = 't2.small'
         Desired_Nodes = '1'
         Min_Nodes = '1'
-        Max_Nodes = '2'
-        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:3.1'
+        Max_Nodes = '3'
+        Image_Name = 'nginx'
 
     }
     stages {
