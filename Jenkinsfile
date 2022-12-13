@@ -1,16 +1,16 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'tbdcluster'
+        Cluster_Name = 'trialcluster'
         K8s_Version = '1.21'
         Region = 'us-east-1'
         Availability_Zones = 'us-east-1a,us-east-1f'
-        NodeGroup_Name = 'tbdng'
+        NodeGroup_Name = 'trialng'
         Instance_Type = 't2.small'
-        Desired_Nodes = '1'
+        Desired_Nodes = '2'
         Min_Nodes = '1'
         Max_Nodes = '2'
-        Image_Name = '615441698862.dkr.ecr.us-east-1.amazonaws.com/petclinic:3.1'
+        Image_Name = 'kgvprasad/mypetclinicapp'
 
     }
     stages {
@@ -64,6 +64,20 @@ environment {
                   }
             }
         }
+        // stage('List Docker Images from AWS ECR') {
+        //     steps {
+        //           withAWS(credentials:'aws_credentials') {
+        //           sh '''
+        //                images="$(aws ecr list-images --repository-name petclinic --region us-east-1 --output=text | awk '{print $3}')"
+        //                echo ${images} > myimages.txt
+        //               '''
+        //             script {
+        //                 myImg = readFile('myimages.txt').trim()
+        //             }              
+        //             echo "${myImg} are ECR Images found on AWS"
+        //           }
+        //     }
+        // }
         stage('Modify Deployment.yaml file ') {
             steps {
                   withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
@@ -106,4 +120,3 @@ environment {
     }
 }
     
-
