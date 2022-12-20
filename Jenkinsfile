@@ -25,54 +25,54 @@ environment {
 
     }
     stages {
-        stage('To Create Connection Between AWS and GitHub') {
-            input {
-                message "Enter AWS CodeGuru Connection Name"
-                ok "Proceed"
-                parameters {
-                    string(name: "Conn_Name", defaultValue: "CodeguruConnection")
-                }
-            }
-            steps {
-                  withAWS(credentials:'aws_credentials') {
-                  sh '''
-                    aws codestar-connections create-connection \
-                        --provider-type GitHub \
-                        --region ${Region} \
-                        --connection-name ${Conn_Name}
-                      '''
-                }
-            }
-        }
-        stage('Update the Pending Connection') {
-            input {
-                message "Go to AWS Console, Update the Pending Connection and Click on Proceed Below"
-                ok "Proceed"
-            }
-            steps {
-                echo "Connection Between AWS and GitHub Successful"
-            }
-        }
-        stage('To Associate GitHub Repository with AWS CodeGuru Reviewer') {
-            input {
-                message "Enter GitHub Repository Details"
-                ok "Proceed"
-                parameters {
-                    string(name: "Owner_Name", defaultValue: "asad2733")
-                    string(name: "Repo_Name", defaultValue: "spring-petclinic-docker")
-                    string(name: "Conn_Arn", defaultValue: "")
-                }
-            }
-            steps {
-                  withAWS(credentials:'aws_credentials') {
-                  sh '''
-                    aws codeguru-reviewer associate-repository \
-                        --region ${Region} \
-	                    --repository "GitHubEnterpriseServer={Owner=${Owner_Name}, Name=${Repo_Name}, ConnectionArn=${Conn_Arn} }"
-                      '''
-                }
-            }
-        }
+//         stage('To Create Connection Between AWS and GitHub') {
+//             input {
+//                 message "Enter AWS CodeGuru Connection Name"
+//                 ok "Proceed"
+//                 parameters {
+//                     string(name: "Conn_Name", defaultValue: "CodeguruConnection")
+//                 }
+//             }
+//             steps {
+//                   withAWS(credentials:'aws_credentials') {
+//                   sh '''
+//                     aws codestar-connections create-connection \
+//                         --provider-type GitHub \
+//                         --region ${Region} \
+//                         --connection-name ${Conn_Name}
+//                       '''
+//                 }
+//             }
+//         }
+//         stage('Update the Pending Connection') {
+//             input {
+//                 message "Go to AWS Console, Update the Pending Connection and Click on Proceed Below"
+//                 ok "Proceed"
+//             }
+//             steps {
+//                 echo "Connection Between AWS and GitHub Successful"
+//             }
+//         }
+//         stage('To Associate GitHub Repository with AWS CodeGuru Reviewer') {
+//             input {
+//                 message "Enter GitHub Repository Details"
+//                 ok "Proceed"
+//                 parameters {
+//                     string(name: "Owner_Name", defaultValue: "asad2733")
+//                     string(name: "Repo_Name", defaultValue: "spring-petclinic-docker")
+//                     string(name: "Conn_Arn", defaultValue: "")
+//                 }
+//             }
+//             steps {
+//                   withAWS(credentials:'aws_credentials') {
+//                   sh '''
+//                     aws codeguru-reviewer associate-repository \
+//                         --region ${Region} \
+// 	                    --repository "GitHubEnterpriseServer={Owner=${Owner_Name}, Name=${Repo_Name}, ConnectionArn=${Conn_Arn} }"
+//                       '''
+//                 }
+//             }
+//         }
         stage('To Run AWS CodeReview on the Associated Branch') {
             input {
                 message "Enter AWS Code Review Details"
@@ -90,7 +90,7 @@ environment {
                         --name ${CodeReview_Name} \
                         --region ${Region} \
                         --repository-association-arn ${Repo_Asso_Arn} \
-                        --type "{\"'"RepositoryAnalysis\"'":{\"'"RepositoryHead\"'":{\"'"BranchName\"'":\"${Branch_Name}\"}}}"
+                        --type "{\"'"RepositoryAnalysis\"'":{\"'"RepositoryHead\"'":{\"'"BranchName\"'":\"'"${Branch_Name}\"'"}}}"
                       '''
                 }
             }
