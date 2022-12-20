@@ -90,7 +90,7 @@ environment {
                         --name ${CodeReview_Name} \
                         --region ${Region} \
                         --repository-association-arn ${Repo_Asso_Arn} \
-                        --type '{\"'"RepositoryAnalysis\"'":{\"'"RepositoryHead\"'":{\"'"BranchName\"'":\"'"'"${Branch_Name}\"'"'"}}}'
+                        --type '{\"'"RepositoryAnalysis\"'":{\"'"RepositoryHead\"'":{\"'"BranchName\"'":\"'"${Branch_Name}\"'"}}}'
                       '''
                 }
             }
