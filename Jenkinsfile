@@ -1,11 +1,11 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'trialcluster'
+        Cluster_Name = 'sdsdsf'
         K8s_Version = '1.21'
         Region = 'us-east-2'
         Availability_Zones = 'us-east-2a,us-east-2b'
-        NodeGroup_Name = 'trialng'
+        NodeGroup_Name = 'aaa'
         Instance_Type = 't2.small'
         Desired_Nodes = '1'
         Min_Nodes = '1'
@@ -90,7 +90,7 @@ environment {
                         --name ${CodeReview_Name} \
                         --region ${Region} \
                         --repository-association-arn ${Repo_Asso_Arn} \
-                        --type "{\"'"RepositoryAnalysis\"'":{\"'"RepositoryHead\"'":{\"'"BranchName\"'":\"'"'"${Branch_Name}\"'"'"}}}"
+                        --type "{\"'"RepositoryAnalysis\"'":{\"'"RepositoryHead\"'":{\"'"BranchName\"'":\"'"${Branch_Name}\"'"}}}"
                       '''
                 }
             }
