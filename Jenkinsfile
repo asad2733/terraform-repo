@@ -21,7 +21,7 @@ environment {
         // Min_Nodes = '1'
         // Max_Nodes = '2'
         // Image_Name = 'nginx'
-        // Branch_Name = 'MigrationToCloud'
+        Branch_Name = 'MigrationToCloud'
 
     }
     stages {
@@ -80,7 +80,7 @@ environment {
                 parameters {
                     string(name: "CodeReview_Name", defaultValue: "petclinic-code-review")
                     string(name: "Repo_Asso_Arn", defaultValue: "")
-                    string(name: "Branch_Name", defaultValue: "MigrationToCloud")
+//                     string(name: "Branch_Name", defaultValue: "MigrationToCloud")
                 }
             }
             steps {
