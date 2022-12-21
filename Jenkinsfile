@@ -85,12 +85,16 @@ environment {
             }
             steps {
                    withAWS(credentials:'aws_credentials') {
+                   script{
+                      def jsonObj = readJSON text: "${params.Branch_Name}"
+                      echo "$jsonObj"
+                      }
                    sh '''
                     aws codeguru-reviewer create-code-review \
                         --name ${CodeReview_Name} \
                         --region ${Region} \
                         --repository-association-arn ${Repo_Asso_Arn} \
-                        --type "{ \"'"RepositoryAnalysis\"'": { \"'"RepositoryHead\"'": { \"'"BranchName\"'": \"'"${params.Branch_Name}\"'" } } }"
+                        --type "{ \"'"RepositoryAnalysis\"'": { \"'"RepositoryHead\"'": { \"'"BranchName\"'": \"'"${Branch_Name}\"'" } } }"
                       '''
                 }
             }
