@@ -3,8 +3,8 @@ pipeline {
 environment {
         Cluster_Name = 'cgcluster'
         K8s_Version = '1.21'
-        Region = 'us-east-1'
-        Availability_Zones = 'us-east-1a,us-east-1b'
+        Region = 'us-east-2'
+        Availability_Zones = 'us-east-2a,us-east-2b'
         NodeGroup_Name = 'cgng'
         Instance_Type = 't2.small'
         Desired_Nodes = '1'
