@@ -80,7 +80,7 @@ environment {
                 parameters {
                     string(name: "CodeReview_Name", defaultValue: "petclinic-code-review")
                     string(name: "Repo_Asso_Arn", defaultValue: "")
-                    string(name: "Branch_Name", defaultValue: "MigrationToCloud")
+                    string(name: "Branch_Name1", defaultValue: "MigrationToCloud")
                 }
             }
             steps {
@@ -90,7 +90,7 @@ environment {
                         --name ${CodeReview_Name} \
                         --region ${Region} \
                         --repository-association-arn ${Repo_Asso_Arn} \
-                        --type "{ \"'"RepositoryAnalysis\"'": { \"'"RepositoryHead\"'": { \"'"BranchName\"'": [\"'"${Branch_Name}\"'"] } } }"
+                        --type "{ \"'"RepositoryAnalysis\"'": { \"'"RepositoryHead\"'": { \"'"BranchName\"'": [\"'"${Branch_Name1}\"'"] } } }"
                       '''
                 }
             }
