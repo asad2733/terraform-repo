@@ -3,8 +3,8 @@ pipeline {
 environment {
         Cluster_Name = 'awsbgcluster'
         K8s_Version = '1.21'
-        Region = 'us-east-2'
-        Availability_Zones = 'us-east-2a,us-east-2b'
+        Region = 'ap-southeast-1'
+        Availability_Zones = 'ap-southeast-1a,ap-southeast-1b'
         NodeGroup_Name = 'awsbgng'
         Instance_Type = 't2.small'
         Desired_Nodes = '1'
