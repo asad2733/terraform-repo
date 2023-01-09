@@ -1,16 +1,16 @@
 pipeline {
     agent any
 environment {
-        Cluster_Name = 'cgcluster'
+        Cluster_Name = 'awsbgcluster'
         K8s_Version = '1.21'
         Region = 'us-east-2'
         Availability_Zones = 'us-east-2a,us-east-2b'
-        NodeGroup_Name = 'cgng'
+        NodeGroup_Name = 'awsbgng'
         Instance_Type = 't2.small'
         Desired_Nodes = '1'
         Min_Nodes = '1'
-        Max_Nodes = '1'
-        Image_Name = 'nginx'
+        Max_Nodes = '2'
+        Image_Name = 'kgvprasad/mypetclinicapp'
         // Cluster_Name = 'trialcluster'
         // K8s_Version = '1.21'
         // Region = 'us-east-2'
