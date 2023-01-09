@@ -16,6 +16,6 @@ spec:
     spec:
        containers:
          - name: spring-petclinic-docker
-           image: kgvprasad/mypetclinicapp
+           image: app image name:
            ports:
              - containerPort: 8080
