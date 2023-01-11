@@ -148,13 +148,13 @@ environment {
                 }
             }
         }
-        // stage('Create Docker image & push to AWS ECR') {
-        //     steps {
-        //           withAWS(credentials:'aws_credentials') {
-        //           sh './makedocker.sh'
-        //           }
-        //     }
-        // }
+        stage('Create Docker image & push to AWS ECR') {
+            steps {
+                  withAWS(credentials:'aws_credentials') {
+                  sh './makedocker1.sh'
+                  }
+            }
+        }
         stage('Modify Deployment.yaml file ') {
             steps {
                   withCredentials([gitUsernamePassword(credentialsId: 'git_credentials')]) {
