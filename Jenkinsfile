@@ -10,7 +10,7 @@ environment {
         Desired_Nodes = '1'
         Min_Nodes = '1'
         Max_Nodes = '2'
-        Image_Name = 'kgvprasad/mypetclinicapp'
+        Image_Name = '460606100227.dkr.ecr.ap-southeast-1.amazonaws.com/awsbg:latest'
         // Cluster_Name = 'trialcluster'
         // K8s_Version = '1.21'
         // Region = 'us-east-2'
